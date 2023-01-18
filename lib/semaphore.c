@@ -25,14 +25,14 @@ void semaphore_wait(semaphore *semaphore1){
     spinlock_lock(&semaphore1->lock);
     // If the value is 0, make the thread go to sleep
     // and add it to the list of waiting threads.
-    if(s->value==0){
+    if(semaphore1->value==0){
         thread * this = malloc(sizeof(struct thread));
 
         this->info.thread_id = gettid();
         this->next = NULL;
 
         // Add it to the waiting list.
-        thread_list_add(&semaphore1->wait_list,this);
+        thread_list_add(&semaphore1->wait_list,this.info);
 
         // Initialize the signal set.
         sigset_t block_signals;
@@ -61,11 +61,11 @@ void semaphore_signal(semaphore *semaphore1) {
 
     //The next thread that is waiting will be chosen
     if (!thread_list_empty(&semaphore1->wait_list)) {
-        thread *next_thr = thread_list_pop(&semaphore1->wait_list);
+//        thread_info next_thr = thread_list_head(&semaphore1->wait_list);
         spinlock_unlock(&semaphore1->lock);
 
-        tgkill(next_thr->info.thread_id, SIGUSR1);
-        free(next_thr);
+//        tgkill(next_thr->thread_id, SIGUSR1);
+//        free(next_thr);
     } else {
         semaphore1->value++;
         spinlock_unlock(&semaphore1->lock);

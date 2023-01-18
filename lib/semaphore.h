@@ -3,7 +3,7 @@
 //
 
 #include"spinlock.h"
-#include"defines.h"
+#include"thread.h"
 
 #ifndef SEMAPHORE_H
 #define SEMAPHORE_H
