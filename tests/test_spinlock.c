@@ -5,6 +5,7 @@
 #include<stdio.h>
 #include<pthread.h>
 #include<spinlock.h>
+#include<assert.h>
 
 #define NUM_THREADS 50
 #define NUM_ITERATIONS 100000
@@ -35,7 +36,6 @@ int main() {
         pthread_join(threads[i], NULL);
     }
     spinlock_delete(&lock);
-    printf("The counter expected value: %d \n", NUM_THREADS * NUM_ITERATIONS);
-    printf("The counter is: %d \n", global_counter);
+    assert(global_counter == NUM_ITERATIONS * NUM_THREADS);
     return 0;
 }
