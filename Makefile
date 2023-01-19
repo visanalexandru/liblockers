@@ -3,7 +3,7 @@
 all : bin library tests
 
 # Tests
-tests: bin/test_spinlock bin/test_thread bin/test_semaphore
+tests: bin/test_spinlock bin/test_thread bin/test_semaphore bin/test_spinlock bin/test_mutex
 bin/test_semaphore : bin/liblockers.a tests/test_semaphore.c
 	gcc tests/test_semaphore.c -pthread -Ilib -Lbin -llockers -o bin/test_semaphore
 bin/test_thread: bin/liblockers.a tests/test_thread.c
@@ -17,8 +17,8 @@ bin/test_mutex: bin/liblockers.a tests/test_mutex.c
 
 # Library
 library : bin/liblockers.a
-bin/liblockers.a : bin/spinlock.o bin/thread.o bin/mutex.o
-	ar rcs bin/liblockers.a bin/spinlock.o bin/thread.o bin/mutex.o
+bin/liblockers.a : bin/spinlock.o bin/thread.o bin/mutex.o bin/semaphore.o
+	ar rcs bin/liblockers.a bin/spinlock.o bin/thread.o bin/mutex.o bin/semaphore.o
 bin/spinlock.o: lib/spinlock.c lib/spinlock.h
 	gcc -c lib/spinlock.c -o bin/spinlock.o
 bin/thread.o : lib/thread.c lib/thread.h

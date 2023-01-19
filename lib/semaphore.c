@@ -4,70 +4,71 @@
 #include "semaphore.h"
 #include "thread.h"
 
-void semaphore_init(semaphore *semaphore1, int value) {
-    semaphore1->value = value;
+void semaphore_init(semaphore *semaphore, int value) {
+    // Initialize the thread list.
+    thread_list_init(&semaphore->thread_list);
 
-    //The list of waiting threads
-    thread_list_init(&semaphore1->wait_list);
+    // Initialize the spinlock.
+    spinlock_init(&semaphore->spinlock);
 
-    //Initialization for the spinlock of the semaphore
-    spinlock_init(&semaphore1->lock)
+    semaphore->value = value;
 }
 
-//Free memory used by semaphore
-void semaphore_destroy(semaphore *semaphore1) {
-    semaphore1->value = 0;
-    thread_list_delete(&semaphore1->wait_list);
-    spinlock_delete(&semaphore1->lock);
+void semaphore_destroy(semaphore *semaphore) {
+    // Delete the thread list.
+    thread_list_delete(&semaphore->thread_list);
+
+    // Delete the spinlock.
+    spinlock_delete(&semaphore->spinlock);
+
+    semaphore->value = 0;
 }
 
-void semaphore_wait(semaphore *semaphore1){
-    spinlock_lock(&semaphore1->lock);
-    // If the value is 0, make the thread go to sleep
-    // and add it to the list of waiting threads.
-    if(semaphore1->value==0){
-        thread * this = malloc(sizeof(struct thread));
+void semaphore_wait(semaphore *semaphore) {
+    spinlock_lock(&semaphore->spinlock);
 
-        this->info.thread_id = gettid();
-        this->next = NULL;
+    // If the semaphore is not 0, just decrement its value.
+    if (semaphore->value != 0) {
+        semaphore->value--;
+        spinlock_unlock(&semaphore->spinlock);
+    } else {
+
+        // Get the current thread info.
+        thread_info thread = get_current_thread();
 
         // Add it to the waiting list.
-        thread_list_add(&semaphore1->wait_list,this.info);
+        thread_list_add(&semaphore->thread_list, thread);
 
-        // Initialize the signal set.
-        sigset_t block_signals;
-        sigemptyset(&block_signals);
-        sigaddset(&block_signals, SIGUSR1);
+        // Create the signal mask.
+        sigset_t block_signal;
+        sigemptyset(&block_signal);
+        sigaddset(&block_signal, SIGUSR1);
+        // Block the signal before calling sigwait().
+        pthread_sigmask(SIG_BLOCK, &block_signal, NULL);
 
-        // Block the signals.
-        sigprocmask(SIG_BLOCK, &block_signals, NULL);
-
-        // We block the signal before unlocking the
-        // spinlock to avoid a race condition.
-        spinlock_unlock(&semaphore1->lock);
+        spinlock_unlock(&semaphore->spinlock);
 
         // Go to sleep until we receive SIGUSR1.
         int received;
-        sigwait(&block_signals,&received);
-    }
-    else{
-        semaphore1->value--;
-        spinlock_unlock(&semaphore1->lock);
+        sigwait(&block_signal, &received);
+        // The thread can now continue.
     }
 }
 
-void semaphore_signal(semaphore *semaphore1) {
-    spinlock_lock(&semaphore1->lock);
+void semaphore_signal(semaphore *semaphore) {
+    spinlock_lock(&semaphore->spinlock);
 
-    //The next thread that is waiting will be chosen
-    if (!thread_list_empty(&semaphore1->wait_list)) {
-//        thread_info next_thr = thread_list_head(&semaphore1->wait_list);
-        spinlock_unlock(&semaphore1->lock);
-
-//        tgkill(next_thr->thread_id, SIGUSR1);
-//        free(next_thr);
+    // If the thread list is empty, increment the value of the semaphore.
+    if (thread_list_empty(&semaphore->thread_list)) {
+        semaphore->value++;
+        spinlock_unlock(&semaphore->spinlock);
     } else {
-        semaphore1->value++;
-        spinlock_unlock(&semaphore1->lock);
+        // Get the first thread in the queue.
+        thread_info first = thread_list_head(&semaphore->thread_list);
+        // Remove the head.
+        thread_list_pop(&semaphore->thread_list);
+        spinlock_unlock(&semaphore->spinlock);
+        // Wake up the thread.
+        pthread_kill(first.thread, SIGUSR1);
     }
 }

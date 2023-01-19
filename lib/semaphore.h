@@ -4,46 +4,47 @@
 
 #include"spinlock.h"
 #include"thread.h"
+#include"signal.h"
 
-#ifndef SEMAPHORE_H
-#define SEMAPHORE_H
-
-
-// A semaphore is a type of lock that works using two atomic instructions:
-// signal() will increment the value of the semaphore.
-// wait() will block the thread until the value of the semaphore is greater
-// than 0. Once the value is greater than 0, the value will be decremented
-// and the thread will be unblocked.
+#ifndef LOCKERS_SEMAPHORE_H
+#define LOCKERS_SEMAPHORE_H
 
 
+/* A semaphore must have a value that is greater or equal to 0. It must implement
+ * two methods: wait() and signal(). If the semaphore's value is greater than 0,
+ * a call to wait() simply decrements the value of the semaphore. A thread that
+ * calls wait() on a semaphore that has a value of 0 is blocked until the semaphore's
+ * value is greater than 0. We implement this behaviour as follows: The mutex will
+ * hold information about the threads that are waiting for the semaphore to have a
+ * value greater than 0 in a queue. Whenever a thread tries to wait() on a semaphore
+ * that has a value of 0, it is blocked and added to the queue. A call to signal()
+ * wakes up the first thread in the queue to resume execution if the queue is not empty.
+ * If the queue is empty, simply increment the value of the semaphore.
+ * All calls to wait() and signal() must be made sequentially so a spinlock is
+ * used to ensure this.
+ *  */
 
-// This structure manages a semaphore.
-// value - the value of the semaphore.
-// thread_list - the list of threads that are waiting to aquire the lock.
-// lock - a spinlock used to make wait() and signal() atomic.
 typedef struct semaphore {
+    // The spinlock used to ensure sequential operations
+    spinlock spinlock;
+
+    // The list of waiting threads.
+    thread_list thread_list;
+
+    // The value of the semaphore.
     int value;
-    thread_list wait_list;
-    spinlock lock;
 } semaphore;
 
-
-// When the value of the semaphore is 0, threads that
-// call wait() are added into the list of waiting threads.
-// When a call to signal() occurs, waiting threads are chosen
-// for execution in the FIFO (first-in-first out) order.
-
-
 // Initializes the semaphore with the given value.
-void semaphore_init(semaphore *semaphore1, int value);
+void semaphore_init(semaphore *semaphore, int value);
 
-// Destroys the semaphore.
-void semaphore_destroy(semaphore *semaphore1);
+// Frees the memory used by the semaphore.
+void semaphore_destroy(semaphore *semaphore);
 
-// Waits until the thread can aquire the semapore.
-void semaphore_wait(semaphore *semaphore1);
+// Tries to decrement the value of the semaphore.
+void semaphore_wait(semaphore *semaphore);
 
 // Increments the value of the semaphore.
-void semaphore_signal(semaphore *semaphore1);
+void semaphore_signal(semaphore *semaphore);
 
 #endif
