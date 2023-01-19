@@ -3,7 +3,7 @@
 //
 #include<stdio.h>
 #include<pthread.h>
-#include"../lib/semaphore.h"
+#include<semaphore.h>
 #include<assert.h>
 
 #define NUM_THREADS 50
