@@ -35,7 +35,7 @@ int main() {
     for (int i = 0; i < NUM_THREADS; i++) {
         pthread_join(threads[i], NULL);
     }
-    semaphore_destroy(&semaphore1);
+    semaphore_delete(&semaphore1);
     assert(global_counter == NUM_ITERATIONS * NUM_THREADS);
 
     return 0;
