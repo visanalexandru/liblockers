@@ -7,12 +7,20 @@
 void mutex_init(mutex *mutex) {
     // Initialize the thread list.
     thread_list_init(&mutex->thread_list);
+
+    // Initialize the spinlock.
+    spinlock_init(&mutex->spinlock);
+
     mutex->status = MUTEX_UNLOCKED;
 }
 
 void mutex_delete(mutex *mutex) {
     // Delete the thread list.
     thread_list_delete(&mutex->thread_list);
+
+    // Delete the spinlock.
+    spinlock_delete(&mutex->spinlock);
+
     mutex->status = MUTEX_UNLOCKED;
 }
 
