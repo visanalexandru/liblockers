@@ -5,6 +5,7 @@
 #ifndef LOCKERS_SPINLOCK_H
 #define LOCKERS_SPINLOCK_H
 
+#include<sched.h>
 /*
  * This macro defines the compare and swap function.
  * The CAS function takes a pointer to a value. If the value was old_value, set the value
@@ -13,7 +14,8 @@
  */
 #define COMPARE_AND_SWAP(ptr, old_value, new_value) __sync_val_compare_and_swap(ptr,old_value,new_value)
 
-
+// The number of unsuccessful tries to acquire the lock before yielding the cpu.
+#define NUM_TRIES 100
 #define SPINLOCK_LOCKED 1
 #define SPINLOCK_UNLOCKED 0
 
