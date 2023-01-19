@@ -5,9 +5,8 @@
 
 thread_info get_current_thread() {
     thread_info info;
-    info.process_id = getpid();
     // There is no system call wrapper for gettid().
-    info.thread_id = syscall(SYS_gettid);
+    info.thread = pthread_self();
     return info;
 }
 

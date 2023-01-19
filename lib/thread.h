@@ -9,15 +9,12 @@
 #include<sys/types.h>
 #include<sys/syscall.h>
 #include<stdlib.h>
+#include<pthread.h>
 
-/* A thread is uniquely identified by the thread id and the process id.
- * This allows us to use the tgkill system call to signal a thread.
- */
+// Information about a thread.
 typedef struct thread_info {
-    // The process id of the thread.
-    pid_t process_id;
     // The thread id of the thread.
-    pid_t thread_id;
+    pthread_t thread;
 } thread_info;
 
 typedef struct thread {
