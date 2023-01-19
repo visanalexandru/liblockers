@@ -25,5 +25,6 @@ void spinlock_lock(spinlock *spinlock) {
 }
 
 void spinlock_unlock(spinlock *spinlock) {
-    spinlock->status = SPINLOCK_UNLOCKED;
+    // Call compare and swap to ensure a memory barrier.
+    COMPARE_AND_SWAP(&spinlock->status, SPINLOCK_LOCKED, SPINLOCK_UNLOCKED);
 }
