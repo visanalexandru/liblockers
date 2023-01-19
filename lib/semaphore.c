@@ -14,7 +14,7 @@ void semaphore_init(semaphore *semaphore, int value) {
     semaphore->value = value;
 }
 
-void semaphore_destroy(semaphore *semaphore) {
+void semaphore_delete(semaphore *semaphore) {
     // Delete the thread list.
     thread_list_delete(&semaphore->thread_list);
 

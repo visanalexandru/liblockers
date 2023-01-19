@@ -39,7 +39,7 @@ typedef struct semaphore {
 void semaphore_init(semaphore *semaphore, int value);
 
 // Frees the memory used by the semaphore.
-void semaphore_destroy(semaphore *semaphore);
+void semaphore_delete(semaphore *semaphore);
 
 // Tries to decrement the value of the semaphore.
 void semaphore_wait(semaphore *semaphore);
