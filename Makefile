@@ -3,9 +3,9 @@
 all : bin library tests
 
 # Tests
-tests: bin/test_spinlock bin/test_thread bin/test_semaphore bin/test_spinlock bin/test_mutex bin/test_barier bin/test_producer_consumer bin/test_reader_writer
-bin/test_barier : bin/liblockers.a tests/test_barier.c
-	gcc tests/test_barier.c -pthread -Ilib -Lbin -llockers -o bin/test_barier
+tests: bin/test_spinlock bin/test_thread bin/test_semaphore bin/test_spinlock bin/test_mutex bin/test_barrier bin/test_producer_consumer bin/test_reader_writer
+bin/test_barrier : bin/liblockers.a tests/test_barrier.c
+	gcc tests/test_barrier.c -pthread -Ilib -Lbin -llockers -o bin/test_barrier
 bin/test_semaphore : bin/liblockers.a tests/test_semaphore.c
 	gcc tests/test_semaphore.c -pthread -Ilib -Lbin -llockers -o bin/test_semaphore
 bin/test_thread: bin/liblockers.a tests/test_thread.c

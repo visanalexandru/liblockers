@@ -8,6 +8,8 @@ void rwlock_init(rwlock *rwlock) {
     // Initialize the semaphore.
     semaphore_init(&rwlock->empty, 1);
 
+    semaphore_init(&rwlock->turnstile, 1);
+
     // Initialize the mutex.
     mutex_init(&rwlock->mutex);
 
@@ -26,8 +28,8 @@ void rwlock_delete(rwlock *rwlock) {
 
 
 void rwlock_read_acquire(rwlock *rwlock) {
-    // wait()
-    // signal()
+    semaphore_wait(&rwlock->turnstile);
+    semaphore_signal(&rwlock->turnstile);
     // Lock the read mutex to sync readers.
     mutex_acquire(&rwlock->mutex);
     if (rwlock->num_readers == 0) {
@@ -52,6 +54,7 @@ void rwlock_read_release(rwlock *rwlock) {
 }
 
 void rwlock_write_acquire(rwlock *rwlock) {
+    semaphore_wait(&rwlock->turnstile);
     // A thread can acquire the writer lock if there are no threads that
     // own read/write locks.
     // Wait until no more owning threads.
@@ -60,6 +63,7 @@ void rwlock_write_acquire(rwlock *rwlock) {
 }
 
 void rwlock_write_release(rwlock *rwlock) {
+    semaphore_signal(&rwlock->turnstile);
     // Just signal the empty semaphore because there are no more owning threads.
     semaphore_signal(&rwlock->empty);
 }

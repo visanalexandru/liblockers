@@ -31,6 +31,9 @@ typedef struct rwlock {
     // This semaphore is used to signal if there is no thread currently owning
     // any type of lock.
     semaphore empty;
+
+    //this semaphore is used to a turnstile for readers and a mutex for writers.
+    semaphore turnstile;
 } rwlock;
 
 

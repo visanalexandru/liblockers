@@ -10,7 +10,7 @@
 
 #define BUFFER_SIZE 1000000
 
-#define NUM_READERS 100
+#define NUM_READERS 50
 #define NUM_WRITERS 50
 
 rwlock rw;
@@ -21,7 +21,7 @@ int num_writers;
 
 void *reader(void *arg) {
     rwlock_read_acquire(&rw);
-    printf("Reader enters %d", *(int *) arg);
+    printf("Reader enters %d\n", *(int *) arg);
 
     int *old_data = malloc(BUFFER_SIZE * sizeof(int));
     memcpy(old_data, data, BUFFER_SIZE * sizeof(int));
@@ -35,7 +35,7 @@ void *reader(void *arg) {
 
 void *writer(void *arg) {
     rwlock_write_acquire(&rw);
-    printf("Writer enters %d \n", *(int *) arg);
+    printf("Writer enters %d\n", *(int *) arg);
 
     mutex_acquire(&mt);
     num_writers++;
@@ -53,13 +53,42 @@ void *writer(void *arg) {
     num_writers--;
     mutex_release(&mt);
 
-    printf("Writer leaves %d", *(int *) arg);
+    printf("Writer leaves %d\n", *(int *) arg);
     rwlock_write_release(&rw);
     return NULL;
 }
 
 
 int main() {
+//    rwlock_init(&rw);
+//    mutex_init(&mt);
+//
+//    pthread_t readers[NUM_READERS];
+//    pthread_t writers[NUM_WRITERS];
+//
+//    int reader_id[NUM_READERS];
+//    int writer_id[NUM_WRITERS];
+//    for (int i = 0; i < NUM_READERS; i++) {
+//        reader_id[i] = i;
+//        pthread_create(&readers[i], NULL, reader, &reader_id[i]);
+//    }
+//    for (int i = 0; i < NUM_WRITERS; i++) {
+//        writer_id[i] = i;
+//        pthread_create(&writers[i], NULL, writer, &writer_id[i]);
+//    }
+//
+//
+//    for (int i = 0; i < NUM_READERS; i++) {
+//        pthread_join(readers[i], NULL);
+//    }
+//    for (int i = 0; i < NUM_WRITERS; i++) {
+//        pthread_join(writers[i], NULL);
+//    }
+//
+//    mutex_delete(&mt);
+//    rwlock_delete(&rw);
+
+
     rwlock_init(&rw);
     mutex_init(&mt);
 
@@ -68,7 +97,7 @@ int main() {
 
     int reader_id[NUM_READERS];
     int writer_id[NUM_WRITERS];
-    for (int i = 0; i < NUM_READERS; i++) {
+    for (int i = 0; i < NUM_READERS/2; i++) {
         reader_id[i] = i;
         pthread_create(&readers[i], NULL, reader, &reader_id[i]);
     }
@@ -76,8 +105,14 @@ int main() {
         writer_id[i] = i;
         pthread_create(&writers[i], NULL, writer, &writer_id[i]);
     }
-
-
+    for (int i = NUM_READERS/2; i < NUM_READERS; i++) {
+            reader_id[i] = i;
+            pthread_create(&readers[i], NULL, reader, &reader_id[i]);
+    }
+    for (int i = NUM_WRITERS/2; i < NUM_WRITERS; i++) {
+        writer_id[i] = i;
+        pthread_create(&writers[i], NULL, writer, &writer_id[i]);
+    }
     for (int i = 0; i < NUM_READERS; i++) {
         pthread_join(readers[i], NULL);
     }
