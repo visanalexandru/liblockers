@@ -3,7 +3,7 @@
 all : bin library tests
 
 # Tests
-tests: bin/test_spinlock bin/test_thread bin/test_semaphore bin/test_spinlock bin/test_mutex bin/test_barier
+tests: bin/test_spinlock bin/test_thread bin/test_semaphore bin/test_spinlock bin/test_mutex bin/test_barier bin/test_producer_consumer bin/test_reader_writer
 bin/test_barier : bin/liblockers.a tests/test_barier.c
 	gcc tests/test_barier.c -pthread -Ilib -Lbin -llockers -o bin/test_barier
 bin/test_semaphore : bin/liblockers.a tests/test_semaphore.c
@@ -13,7 +13,11 @@ bin/test_thread: bin/liblockers.a tests/test_thread.c
 bin/test_spinlock : bin/liblockers.a tests/test_spinlock.c
 	gcc tests/test_spinlock.c -pthread -Ilib -Lbin -llockers -o bin/test_spinlock
 bin/test_mutex: bin/liblockers.a tests/test_mutex.c
-	gcc tests/test_mutex.c -pthread -Ilib -Lbin -llockers -o bin/test_mutex
+	gcc tests/test_spinlock.c -pthread -Ilib -Lbin -llockers -o bin/test_spinlock
+bin/test_producer_consumer: bin/liblockers.a tests/test_producer_consumer.c
+	gcc tests/test_producer_consumer.c -pthread -Ilib -Lbin -llockers -o bin/test_producer_cosumer
+bin/test_reader_writer : bin/liblockers.a tests/test_reader_writer.c
+	gcc tests/test_reader_writer.c -pthread -Ilib -Lbin -llockers -o bin/test_reader_writer
 
 
 
