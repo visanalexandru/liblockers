@@ -8,8 +8,7 @@
 
 void test_current_thread() {
     thread_info info = get_current_thread();
-    assert(getpid() == info.process_id);
-    assert(syscall(SYS_gettid) == info.thread_id);
+    assert(pthread_self() == info.thread);
 }
 
 void test_list_insert() {
@@ -20,21 +19,18 @@ void test_list_insert() {
     thread_info info[10];
     // Add 10 threads to the list.
     for (int i = 0; i < 10; i++) {
-        info[i].thread_id = i;
-        info[i].process_id = i * 10;
+        info[i].thread = i;
         thread_list_add(&list, info[i]);
     }
     // The list must not be empty.
     assert(!thread_list_empty(&list));
     // The head of the list is the first thread.
-    assert(thread_list_head(&list).process_id == info[0].process_id &&
-           thread_list_head(&list).thread_id == info[0].thread_id);
+    assert(thread_list_head(&list).thread == info[0].thread);
     // Remove the head.
     thread_list_pop(&list);
     assert(!thread_list_empty(&list));
     // The head of the list is now the second thread.
-    assert(thread_list_head(&list).process_id == info[1].process_id &&
-           thread_list_head(&list).thread_id == info[1].thread_id);
+    assert(thread_list_head(&list).thread == info[1].thread);
     for (int i = 0; i < 9; i++) {
         thread_list_pop(&list);
     }
@@ -48,8 +44,7 @@ void test_list_delete() {
     // Add 10 threads to the list.
     for (int i = 0; i < 10; i++) {
         thread_info info;
-        info.process_id = 2 * i;
-        info.thread_id = 3 * i;
+        info.thread = 3 * i;
         thread_list_add(&list, info);
     }
     thread_list_delete(&list);
